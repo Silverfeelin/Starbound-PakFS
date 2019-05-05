@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbound-PakFS", "Starbound-PakFS\Starbound-PakFS.csproj", "{A484492E-9BFF-47F9-89BB-B9E2FCF97415}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A484492E-9BFF-47F9-89BB-B9E2FCF97415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A484492E-9BFF-47F9-89BB-B9E2FCF97415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A484492E-9BFF-47F9-89BB-B9E2FCF97415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A484492E-9BFF-47F9-89BB-B9E2FCF97415}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BC7159B-4666-4921-836A-216AB0F6C9DD}
+	EndGlobalSection
+EndGlobal
