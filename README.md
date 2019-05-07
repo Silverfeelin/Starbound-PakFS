@@ -13,7 +13,8 @@ With the provider, the pak file is projected as a directory without needing to u
 
 ## Prerequistes
 
-* Windows Projected File System
+* Windows 10 64-bits.
+* Windows Projected File System.
 * [.NET Framework 4.6.1](https://www.microsoft.com/en-US/download/details.aspx?id=49981) or higher.
 
 To enabled the Windows Projected File System, launch `Windows Features` from the start menu and enable it from the list, as illustrated in the image below.
