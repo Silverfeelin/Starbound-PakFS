@@ -126,7 +126,7 @@ namespace PakFS
                     {
                         Name = item.Path.Substring(item.Path.LastIndexOf("/") + 1),
                         Size = Convert.ToInt64(item.Length),
-                        Attributes = FileAttributes.ReadOnly
+                        Attributes = FileAttributes.Normal
                     };
                 }
             }
@@ -156,7 +156,7 @@ namespace PakFS
                 {
                     Name = "_metadata",
                     Size = metadata.Length,
-                    Attributes = FileAttributes.ReadOnly
+                    Attributes = FileAttributes.Normal
                 };
             }
 
@@ -183,7 +183,7 @@ namespace PakFS
                     {
                         Name = assetPath.Substring(assetPath.LastIndexOf("/") + 1),
                         Size = Convert.ToInt64(file.Length),
-                        Attributes = FileAttributes.ReadOnly
+                        Attributes = FileAttributes.Normal
                     };
                 }
             }
