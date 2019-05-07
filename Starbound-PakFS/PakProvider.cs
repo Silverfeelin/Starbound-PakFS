@@ -20,10 +20,10 @@ namespace PakFS
         private readonly string targetRoot;
 
         private readonly VirtualizationInstance virtualizationInstance;
-        private readonly ConcurrentDictionary<Guid, ActiveEnumeration> activeEnumerations;
+        private readonly ConcurrentDictionary<Guid, FileEnumeration> enumerations;
 
-        private FileStream fileStream;
-        private BinaryReader binaryReader;
+        private readonly FileStream fileStream;
+        private readonly BinaryReader binaryReader;
         
         // Directory = DirectoryFiles
         private readonly Dictionary<string, List<PakItem>> fileTree;
@@ -56,7 +56,7 @@ namespace PakFS
             // Disallow delete/rename.
             virtualizationInstance.OnNotifyPreDelete = new NotifyPreDeleteCallback((a, b, c, d) => false);
             virtualizationInstance.OnNotifyPreRename = new NotifyPreRenameCallback((a, b, c, d) => false);            
-            activeEnumerations = new ConcurrentDictionary<Guid, ActiveEnumeration>();
+            enumerations = new ConcurrentDictionary<Guid, FileEnumeration>();
         }
 
         /// <summary>
@@ -170,41 +170,36 @@ namespace PakFS
         }
 
         #region IRequiredCallbacks
-
-        /// <summary>
-        /// Source: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/simpleProviderManaged/SimpleProvider.cs#L354
-        /// License: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/LICENSE
-        /// </summary>
+        
         public HResult StartDirectoryEnumerationCallback(int commandId, Guid enumerationId, string relativePath, uint triggeringProcessId, string triggeringProcessImageFileName)
         {
-            ActiveEnumeration activeEnumeration = new ActiveEnumeration(
-                EnumerateDirectory(relativePath)
-                .OrderBy(file => file.Name, Comparer<string>.Create((a, b) => Utils.FileNameCompare(a, b)))
-                .ToList());
-            
-            return activeEnumerations.TryAdd(enumerationId, activeEnumeration)
-                ? HResult.Ok
-                : HResult.InternalError;            
-        }
+            var enumerable = EnumerateDirectory(relativePath)
+                .OrderBy(
+                    file => file.Name,
+                    Comparer<string>.Create((a, b) => Utils.FileNameCompare(a, b))
+                );
+            var enumeration = new FileEnumeration(enumerable);
+            enumeration.MoveNext(); // Start enumeration.
 
-        /// <summary>
-        /// Source: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/simpleProviderManaged/SimpleProvider.cs#L354
-        /// License: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/LICENSE
-        /// </summary>
+            var added = enumerations.TryAdd(enumerationId, enumeration);
+            return added ? HResult.Ok : HResult.InternalError;            
+        }
+        
         public HResult GetDirectoryEnumerationCallback(int commandId, Guid enumerationId, string filterFileName, bool restartScan, IDirectoryEnumerationResults enumResult)
         {
-            if (!activeEnumerations.TryGetValue(enumerationId, out ActiveEnumeration enumeration))
+            if (!enumerations.TryGetValue(enumerationId, out FileEnumeration enumeration))
                 return HResult.InternalError;
 
             if (restartScan)
-                enumeration.RestartEnumeration(filterFileName);
-            else
-                enumeration.TrySaveFilterString(filterFileName);
+                enumeration.Reset();
 
-            bool entryAdded = false;
-            HResult hr = HResult.Ok;
+            if (restartScan || enumeration.Filter == null)
+                enumeration.Filter = filterFileName ?? "";
+            
+            enumeration.MoveNext();
 
-            while (enumeration.IsCurrentValid)
+            bool added = false;
+            while (enumeration.Valid)
             {
                 PakFileSystemInfo fileInfo = enumeration.Current;
 
@@ -218,29 +213,22 @@ namespace PakFS
                     lastWriteTime: DateTime.Now,
                     changeTime: DateTime.Now))
                 {
-                    entryAdded = true;
+                    added = true;
                     enumeration.MoveNext();
                 }
                 else
                 {
-                    return entryAdded ? HResult.Ok : HResult.InsufficientBuffer;
+                    return added ? HResult.Ok : HResult.InsufficientBuffer;
                 }
             }
             
-            return hr;
-        }
-
-        /// <summary>
-        /// Source: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/simpleProviderManaged/SimpleProvider.cs#L354
-        /// License: https://github.com/Microsoft/ProjFS-Managed-API/blob/master/LICENSE
-        /// </summary>
-        public HResult EndDirectoryEnumerationCallback(
-            Guid enumerationId)
-        {
-            if (!activeEnumerations.TryRemove(enumerationId, out ActiveEnumeration enumeration))
-                return HResult.InternalError;
-
             return HResult.Ok;
+        }
+        
+        public HResult EndDirectoryEnumerationCallback(Guid enumerationId)
+        {
+            var removed = enumerations.TryRemove(enumerationId, out FileEnumeration enumeration);
+            return removed ? HResult.Ok : HResult.InternalError;
         }
 
         /// <summary>

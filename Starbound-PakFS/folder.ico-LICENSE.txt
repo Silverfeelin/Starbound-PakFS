@@ -1,0 +1,5 @@
+The application icon (folder.ico) is part of the Fugue Icons package by Yusuke Kamiyamane.
+You can find the icon pack and licensing information on the official website: https://p.yusukekamiyamane.com/
+
+The file is licensed under a Creative Commons Attribution 3.0 License.
+https://creativecommons.org/licenses/by/3.0/

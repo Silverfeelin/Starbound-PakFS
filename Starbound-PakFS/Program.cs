@@ -49,7 +49,7 @@ namespace PakFS
             {
                 try
                 {
-                    Directory.Delete(targetRoot, true);
+                    DeleteDirectory(targetRoot, true);
                 }
                 catch {} // Probably a permission error.
             }
@@ -60,6 +60,20 @@ namespace PakFS
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey(true);
             Environment.Exit(0);
+        }
+
+        private static void DeleteDirectory(string path, bool recursive = false)
+        {
+            if (recursive)
+            {
+                foreach (var item in Directory.EnumerateDirectories(path))
+                {
+                    DeleteDirectory(item, recursive);
+                }
+            }
+
+            // This doesn't work by itself.. recursive aint recursive.
+            Directory.Delete(path, true);
         }
     }
 }
