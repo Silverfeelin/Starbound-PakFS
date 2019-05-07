@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Windows.ProjFS;
-using Newtonsoft.Json.Linq;
 
 namespace PakFS
 {
@@ -27,6 +26,7 @@ namespace PakFS
         
         // Directory = DirectoryFiles
         private readonly Dictionary<string, List<PakItem>> fileTree;
+        private readonly byte[] metadata;
 
         public PakProvider(string filePath, string targetRoot)
         {
@@ -39,6 +39,7 @@ namespace PakFS
 
             var reader = new PakReader();
             var metadata = reader.ReadIndex(binaryReader);
+            this.metadata = Encoding.UTF8.GetBytes(metadata.ToString(Newtonsoft.Json.Formatting.Indented));
             var files = reader.FindItems(binaryReader);
             fileTree = new Dictionary<string, List<PakItem>>();
 
@@ -106,10 +107,16 @@ namespace PakFS
                     Size = 0
                 };
             }
-
-
+            
             // Files
             if (!fullPath.EndsWith("/")) fullPath += "/";
+
+            // Metadata
+            if (fullPath == "/")
+            {
+                yield return GetSystemInfo("/_metadata");
+            }
+
             if (fileTree.ContainsKey(fullPath))
             {
                 foreach (var item in fileTree[fullPath])
@@ -127,6 +134,8 @@ namespace PakFS
 
         protected byte[] ReadFile(string assetPath)
         {
+            if (assetPath == "/_metadata") return this.metadata;
+
             // Get file
             var folder = assetPath.Substring(0, assetPath.LastIndexOf("/") + 1);
             if (!fileTree.ContainsKey(folder)) return null;
@@ -140,6 +149,18 @@ namespace PakFS
         
         private PakFileSystemInfo GetSystemInfo(string assetPath)
         {
+            // Metadata
+            if (assetPath == "/_metadata")
+            {
+                return new PakFileInfo
+                {
+                    Name = "_metadata",
+                    Size = metadata.Length,
+                    Attributes = FileAttributes.ReadOnly
+                };
+            }
+
+            // Directory
             bool isDirectory = !fileTree.FirstOrDefault(f => f.Key.Contains(assetPath)).Equals(default(KeyValuePair<string, List<PakItem>>));
             if (isDirectory)
             {
@@ -150,6 +171,7 @@ namespace PakFS
                 };
             }
 
+            // File
             var i = assetPath.LastIndexOf("/");
             var dir = i == -1 ? "/" : assetPath.Substring(0, assetPath.LastIndexOf("/") + 1);
             if (fileTree.ContainsKey(dir))
