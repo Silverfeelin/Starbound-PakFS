@@ -7,7 +7,7 @@ With the asset unpacker, it can take minutes to unpack files before you can brow
 | ![](https://i.imgur.com/NHPPHQb.png) |
 |---|
 
-With the provider, the pak file is projected as a directory without needing to unpack it first. Files that you open or copy
+With the provider, the pak file is projected as a directory without needing to unpack it first.
 
 > Note: PakFS is not meant as a replacement tool for unpacking files. As it integrats with the Windows Explorer default behaviour, it could very well end up being slower when copying a large amount of files.
 
