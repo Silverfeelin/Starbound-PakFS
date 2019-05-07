@@ -28,7 +28,10 @@ namespace PakFS
                 WaitAndExit();
                 return;
             }
-            
+
+            Console.SetWindowSize(64, 4);
+            Console.SetBufferSize(64, 4);
+
             // PakFile.pak => _PakFile_pak (_ to prevent Starbound from loading it, _pak to prevent name collisions).
             targetRoot = Path.Combine(Path.GetDirectoryName(filePath), $"_{Path.GetFileNameWithoutExtension(filePath)}_pak");
 
