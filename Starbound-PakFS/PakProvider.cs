@@ -34,7 +34,7 @@ namespace PakFS
             this.targetRoot = targetRoot;
             
             // Read pak file
-            fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             binaryReader = new BinaryReader(fileStream);
 
             var reader = new PakReader();
