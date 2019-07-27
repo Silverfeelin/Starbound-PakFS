@@ -76,7 +76,7 @@ namespace PakFS
             }
 
             // This doesn't work by itself.. recursive aint recursive.
-            Directory.Delete(path, true);
+            Directory.Delete(path, recursive);
         }
     }
 }
